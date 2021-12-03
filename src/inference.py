@@ -58,13 +58,12 @@ def get_all_models():
         model_list.append(temp)
     return pd.DataFrame(model_list)
 
-h2o.init(ip="localhost" , port=54321 , min_mem_size = "24G")
-
 class CJPerformance(object):
     
     def __init__(self,model_file):
         self.m_model_file = model_file
         if not self.is_svm():
+            h2o.init(ip="localhost" , port=54321 , min_mem_size = "24G")
             self.m_model = h2o.load_model(model_file)
         else:
             self.m_model = CJSVM()
@@ -147,8 +146,9 @@ def main( trained_model_name ):
         if model_name.strip().lower() == trained_model_name:
             tmp_result = inference( item , csv_list  )
             all_result.extend(tmp_result)
+            break
     df_result = pd.DataFrame(all_result)
-    df_result.to_csv("%s%s.csv"%(g_analyse_path,model_name))
+    df_result.to_csv("%s%s.csv"%(g_analyse_path,trained_model_name))
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
