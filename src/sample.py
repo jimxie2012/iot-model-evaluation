@@ -8,11 +8,11 @@
        s-2: balance samples ( weighted and replaced sample from apo123 )
        s-3: more normal from apo 123 (weighted and replaced sample from apo123)
  
-    2. Create train/test samples from base dataset (base-0,base-1,base-2,base-3)
-       base-0-*: diffrent dataset, 500000 sampling from base-0 with diffrent frac
-       base-1-*: more abnormal, 500000 sampling from base-0 with diffrent frac
-       base-2-*: balance sample, 500000 sampling from base-0 with diffrent frac
-       base-3-*: more normal, 500000 sampling from base-0 with diffrent frac
+    2. Create train/test samples from base dataset with diffrent frac [ 0.5 , 0.1 , 0.5 , 1 ]
+       s-0-*: diffrent dataset, sampling from s-0 ( s-0-1-0,for train, others for test)
+       s-1-*: more abnormal, sampling from s-1 ( s-1-1-0,for train, others for test)
+       s-2-*: balance sample, sampling froms-2 ( s-2-1-0,for train, others for test)
+       s-3-*: more normal, sampling from s-3 ( s-0-3-0,for train, others for test)
 
     3. Change sample format to one-hot coding
        create one-hot code map for 'conn_state','service','proto'
