@@ -146,7 +146,6 @@ def main( trained_model_name ):
         if model_name.strip().lower() == trained_model_name:
             tmp_result = inference( item , csv_list  )
             all_result.extend(tmp_result)
-            break
     df_result = pd.DataFrame(all_result)
     df_result.to_csv("%s%s.csv"%(g_analyse_path,trained_model_name))
 
