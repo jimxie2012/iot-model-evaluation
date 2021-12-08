@@ -9,6 +9,7 @@ import time,json,os,sys
 import numpy as np
 import pandas as pd
 from jsvm import CJSVM
+from jcnn import CJCNN
 from common import preprocess,get_csv_files,g_analyse_path,g_ds_sample_path,g_model_path
 from sklearn.metrics import recall_score
 from sklearn.metrics import confusion_matrix
@@ -62,12 +63,18 @@ class CJPerformance(object):
     
     def __init__(self,model_file):
         self.m_model_file = model_file
-        if not self.is_svm():
-            h2o.init(ip="localhost" , port=54321 , min_mem_size = "24G")
-            self.m_model = h2o.load_model(model_file)
-        else:
+        if self.is_svm():
             self.m_model = CJSVM()
             self.m_model.load(model_file)
+            return
+
+        if self.is_cnn():
+            self.m_model = CJCNN()
+            self.m_model.Load(model_file)
+            return 
+
+        h2o.init(ip="localhost" , port=54321 , min_mem_size = "24G")
+        self.m_model = h2o.load_model(model_file)
     
     def is_svm(self):
         if self.m_model_file.find("sklearn_model_python_svm.pkl") >= 0:
@@ -75,13 +82,32 @@ class CJPerformance(object):
         else:
             return False
     
+    def is_cnn(self):
+        if self.m_model_file.find("sklearn_model_python_cnn.h5") >= 0:
+            return True
+        else:
+            return False
+
     def predict(self , sample_file , need_preprocess = True ):
         df = pd.read_csv(sample_file,index_col=0)
         if need_preprocess:
             df_all = preprocess(df)
         else:
             df_all = df.copy( deep = True )
-        if not self.is_svm():
+        if self.is_cnn():
+            X = df_all.copy( deep = True )
+            Y = X['label']
+            del X['label']
+            y_true = df_all['label'].to_list()
+            y_pred = self.m_model.Predict(X)
+
+        elif self.is_svm():
+            X = df_all.copy( deep = True )
+            Y = X['label']
+            del X['label']
+            y_true = df_all['label'].to_list()
+            y_pred = self.m_model.predict(X)
+        else:
             df_h2o = h2o.H2OFrame(df_all)
             x = df_h2o.columns
             y = "label"
@@ -90,12 +116,6 @@ class CJPerformance(object):
             pred = self.m_model.predict(df_h2o).as_data_frame()
             y_true = df_all[y].to_list()
             y_pred = pred['predict']
-        else:
-            X = df_all.copy( deep = True )
-            Y = X['label']
-            del X['label']
-            y_true = df_all['label'].to_list()
-            y_pred = self.m_model.predict(X)
             
         return y_true,y_pred
     
